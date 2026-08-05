@@ -1084,9 +1084,10 @@ export function adoptExternalSessionFromHook(
 
     knownJsonlFiles.add(transcriptPath);
     const projectDir = path.dirname(transcriptPath);
+    const realCwd = cwd ?? cwdFromTranscript(transcriptPath);
     const folderName =
-      folderNameResolver?.({ cwd, projectDir }) ??
-      folderNameFromProjectDir(path.basename(projectDir));
+      folderNameResolver?.({ cwd: realCwd, projectDir }) ??
+      (realCwd ? path.basename(realCwd) : folderNameFromProjectDir(path.basename(projectDir)));
 
     adoptExternalSession(
       transcriptPath,
@@ -1471,6 +1472,30 @@ function folderNameFromProjectDir(dirName: string): string {
   return parts[parts.length - 1] || dirName;
 }
 
+/** Best-effort cwd extraction from the first records of a transcript file.
+ *  Project dir hashes are lossy ("HA henok" and "HA-henok" collide, only the last
+ *  `-` segment survives) — the cwd recorded in the transcript is the reliable key. */
+function cwdFromTranscript(transcriptPath: string): string | undefined {
+  try {
+    const fd = fs.openSync(transcriptPath, 'r');
+    const buf = Buffer.alloc(8192);
+    const bytesRead = fs.readSync(fd, buf, 0, buf.length, 0);
+    fs.closeSync(fd);
+    for (const line of buf.toString('utf8', 0, bytesRead).split('\n')) {
+      if (!line.trim()) continue;
+      try {
+        const record = JSON.parse(line) as { cwd?: unknown };
+        if (typeof record.cwd === 'string' && record.cwd) return record.cwd;
+      } catch {
+        // Truncated tail line or non-JSON record — keep scanning.
+      }
+    }
+  } catch {
+    // Unreadable file — caller falls back to the dir-hash name.
+  }
+  return undefined;
+}
+
 /** Scan every session root the active provider exposes for active sessions
  *  (global discovery — powers the "Watch All Sessions" toggle). */
 function scanGlobalProjectDirs(
@@ -1533,9 +1558,10 @@ function scanGlobalProjectDirs(
         continue;
       }
 
+      const scanCwd = cwdFromTranscript(file);
       const folderName =
-        folderNameResolver?.({ projectDir: dirPath }) ??
-        folderNameFromProjectDir(path.basename(dirPath));
+        folderNameResolver?.({ cwd: scanCwd, projectDir: dirPath }) ??
+        (scanCwd ? path.basename(scanCwd) : folderNameFromProjectDir(path.basename(dirPath)));
       knownJsonlFiles.add(file);
       console.log(
         `[Pixel Agents] Watcher: detected global session ${path.basename(file)} (${folderName})`,
