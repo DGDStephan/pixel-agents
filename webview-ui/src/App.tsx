@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { toMajorMinor } from './changelogData.js';
+import { AgentDetailCard } from './components/AgentDetailCard.js';
 import { BottomToolbar } from './components/BottomToolbar.js';
 import { ChangelogModal } from './components/ChangelogModal.js';
 import { ConnectionIndicator } from './components/ConnectionIndicator.js';
 import { DebugView } from './components/DebugView.js';
 import { EditActionBar } from './components/EditActionBar.js';
+import { JarvisDashboard } from './components/JarvisDashboard.js';
 import { MigrationNotice } from './components/MigrationNotice.js';
 import { SettingsModal } from './components/SettingsModal.js';
 import { Tooltip } from './components/Tooltip.js';
@@ -99,6 +101,8 @@ function App() {
 
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showJarvisHq, setShowJarvisHq] = useState(isBrowserRuntime);
+  const [detailAgentId, setDetailAgentId] = useState<number | null>(null);
   const [isHooksInfoOpen, setIsHooksInfoOpen] = useState(false);
   const [hooksTooltipDismissed, setHooksTooltipDismissed] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
@@ -217,6 +221,7 @@ function App() {
     const os = getOfficeState();
     const meta = os.subagentMeta.get(agentId);
     const focusId = meta ? meta.parentAgentId : agentId;
+    setDetailAgentId(os.selectedAgentId);
     transport.send({ type: 'focusAgent', id: focusId });
   }, []);
 
@@ -313,6 +318,14 @@ function App() {
 
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden">
+      {isBrowserRuntime && showJarvisHq && (
+        <JarvisDashboard onEnterCampus={() => setShowJarvisHq(false)} />
+      )}
+      {isBrowserRuntime && !showJarvisHq && (
+        <button className="hq-open-btn" onClick={() => setShowJarvisHq(true)}>
+          ← QG
+        </button>
+      )}
       <OfficeCanvas
         officeState={officeState}
         onClick={handleClick}
@@ -417,6 +430,17 @@ function App() {
             onCloseAgent={handleCloseAgent}
             alwaysShowOverlay={alwaysShowOverlay}
           />
+          {detailAgentId !== null && (
+            <AgentDetailCard
+              officeState={officeState}
+              agentId={detailAgentId}
+              agentTools={agentTools}
+              containerRef={containerRef}
+              zoom={editor.zoom}
+              panRef={editor.panRef}
+              onClose={() => setDetailAgentId(null)}
+            />
+          )}
         </>
       ) : (
         <DebugView

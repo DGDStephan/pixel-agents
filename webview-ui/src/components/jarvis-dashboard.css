@@ -1,0 +1,398 @@
+/* JARVIS HQ — direction "Iron Man HUD" (FUI) : cyan holographique sur noir profond,
+   cadres à coins taillés, lueurs, scanline ambiante. Ambre = décision attendue. */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+.hq {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow: auto;
+  color: #bfeaf5;
+  font:
+    14px/1.5 'Share Tech Mono',
+    Consolas,
+    monospace;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(0, 229, 255, 0.07), transparent 60%),
+    radial-gradient(900px 500px at 85% 110%, rgba(0, 229, 255, 0.05), transparent 55%), #030809;
+}
+.hq * {
+  box-sizing: border-box;
+}
+.hq::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 229, 255, 0.012) 3px 4px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hq-bar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+    animation: hq-sweep 6s linear infinite;
+    opacity: 0.7;
+  }
+  @keyframes hq-sweep {
+    0% {
+      transform: translateX(-40%);
+    }
+    100% {
+      transform: translateX(40%);
+    }
+  }
+}
+
+.hq-bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 26px;
+  background: rgba(3, 8, 9, 0.92);
+  backdrop-filter: blur(4px);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+  overflow: hidden;
+}
+.hq-mark {
+  font-family: Orbitron, sans-serif;
+  font-size: 17px;
+  letter-spacing: 0.28em;
+  color: #7fd8e8;
+}
+.hq-mark b {
+  color: #00e5ff;
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.8);
+}
+.hq-count {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #5f8f9c;
+  text-transform: uppercase;
+}
+.hq-count b {
+  color: #ffb84d;
+  text-shadow: 0 0 10px rgba(255, 184, 77, 0.7);
+}
+.hq-spacer {
+  flex: 1;
+}
+
+.hq-btn {
+  font:
+    12px 'Share Tech Mono',
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9fe8f5;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.45);
+  padding: 8px 18px;
+  cursor: pointer;
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+.hq-btn:hover {
+  background: rgba(0, 229, 255, 0.16);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+}
+.hq-btn.primary {
+  background: rgba(0, 229, 255, 0.2);
+  color: #eafcff;
+  border-color: #00e5ff;
+  box-shadow:
+    0 0 14px rgba(0, 229, 255, 0.35),
+    inset 0 0 10px rgba(0, 229, 255, 0.15);
+}
+.hq-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  box-shadow: none;
+}
+
+.hq-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 16px;
+  padding: 20px 26px;
+  max-width: 1220px;
+  margin: 0 auto;
+}
+@media (max-width: 900px) {
+  .hq-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hq-panel {
+  position: relative;
+  background: rgba(0, 20, 26, 0.55);
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  padding: 16px 18px;
+  clip-path: polygon(
+    16px 0,
+    100% 0,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
+    0 100%,
+    0 16px
+  );
+}
+.hq-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(0, 229, 255, 0.08);
+  margin: 4px;
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
+}
+.hq-panel h2 {
+  margin: 0 0 12px;
+  font-family: Orbitron, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #00e5ff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+.hq-brief {
+  font-size: 13px;
+  color: #a9d8e4;
+  white-space: pre-wrap;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.hq-dec {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 9px;
+  padding: 11px 14px;
+  font:
+    13px 'Share Tech Mono',
+    monospace;
+  color: #ffe3b3;
+  cursor: pointer;
+  background: rgba(255, 184, 77, 0.07);
+  border: 1px solid rgba(255, 184, 77, 0.5);
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+.hq-dec:hover {
+  background: rgba(255, 184, 77, 0.16);
+  box-shadow: 0 0 16px rgba(255, 184, 77, 0.3);
+}
+.hq-dec small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  color: #8c7a55;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hq-dec {
+    animation: hq-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes hq-pulse {
+    50% {
+      box-shadow: 0 0 14px rgba(255, 184, 77, 0.25);
+    }
+  }
+}
+.hq-ok {
+  color: #58e0a5;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+
+.hq-cards {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  padding: 0 26px 44px;
+  max-width: 1220px;
+  margin: 0 auto;
+}
+.hq-card {
+  background: rgba(0, 20, 26, 0.55);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  padding: 12px 15px;
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
+}
+.hq-card b {
+  font-family: Orbitron, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #d9f6fc;
+}
+.hq-salle {
+  margin-left: 8px;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #00e5ff;
+  opacity: 0.8;
+}
+.hq-card p {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: #6fa3b0;
+  line-height: 1.5;
+}
+.hq-badge {
+  display: inline-block;
+  margin-top: 7px;
+  font-size: 11px;
+  color: #ffb84d;
+  text-shadow: 0 0 8px rgba(255, 184, 77, 0.5);
+}
+
+.hq-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 6, 8, 0.78);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.hq-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 780px;
+  max-height: 86vh;
+  background: rgba(2, 14, 18, 0.97);
+  border: 1px solid #00e5ff;
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.25),
+    inset 0 0 24px rgba(0, 229, 255, 0.05);
+  clip-path: polygon(
+    22px 0,
+    100% 0,
+    100% calc(100% - 22px),
+    calc(100% - 22px) 100%,
+    0 100%,
+    0 22px
+  );
+}
+.hq-modal header {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+  font-family: Orbitron, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: #eafcff;
+}
+.hq-modal header small {
+  display: block;
+  margin-top: 3px;
+  font:
+    10.5px 'Share Tech Mono',
+    monospace;
+  letter-spacing: 0;
+  color: #5f8f9c;
+}
+.hq-adr {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 20px;
+  font-size: 12px;
+  color: #a9d8e4;
+  white-space: pre-wrap;
+  background: rgba(0, 0, 0, 0.45);
+}
+.hq-modal footer {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 13px 20px;
+  border-top: 1px solid rgba(0, 229, 255, 0.3);
+}
+.hq-modal textarea,
+.hq-modal input {
+  flex: 1;
+  min-height: 46px;
+  resize: vertical;
+  padding: 10px 13px;
+  color: #eafcff;
+  font:
+    13px 'Share Tech Mono',
+    monospace;
+  background: rgba(0, 229, 255, 0.05);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+}
+.hq-modal textarea:focus,
+.hq-modal input:focus {
+  outline: none;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+}
+.hq-err {
+  padding: 0 20px 10px;
+  color: #ff7a6b;
+  font-size: 12px;
+}
+
+.hq-open-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 30;
+  padding: 7px 16px;
+  cursor: pointer;
+  font:
+    12px 'Share Tech Mono',
+    monospace;
+  letter-spacing: 0.12em;
+  color: #eafcff;
+  background: rgba(0, 229, 255, 0.18);
+  border: 1px solid #00e5ff;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+}

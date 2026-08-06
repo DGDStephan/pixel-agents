@@ -14,6 +14,8 @@ import type {
 } from './clientMessageHandler.js';
 import { handleClientMessage } from './clientMessageHandler.js';
 import { HOOK_API_PREFIX, MAX_HOOK_BODY_SIZE } from './constants.js';
+import { registerJarvisRoutes } from './jarvis/routes.js';
+import { registerTacheRoute } from './jarvis/tache.js';
 import type { AgentState } from './types.js';
 
 /** Options for creating the HTTP + WebSocket server. */
@@ -82,6 +84,8 @@ export async function createHttpServer(options: HttpServerOptions): Promise<Http
   registerHealthRoute(app);
   registerHookRoute(app, options);
   registerWebSocketRoute(app, options);
+  registerJarvisRoutes(app);
+  registerTacheRoute(app);
 
   // ── Listen ──────────────────────────────────────────────────
 
