@@ -319,7 +319,7 @@ function App() {
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden">
       {isBrowserRuntime && showJarvisHq && (
-        <JarvisDashboard onEnterCampus={() => setShowJarvisHq(false)} />
+        <JarvisDashboard onEnterCampus={() => setShowJarvisHq(false)} agentsActifs={agents.length} />
       )}
       {isBrowserRuntime && !showJarvisHq && (
         <button className="hq-open-btn" onClick={() => setShowJarvisHq(true)}>

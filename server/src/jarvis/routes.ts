@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -74,7 +75,68 @@ function adrsEnAttente(repoDir: string): AdrEnAttente[] {
   return out;
 }
 
+function gitLog(repoDir: string, args: string[]): Promise<string> {
+  return new Promise((resolve) => {
+    execFile(
+      'git',
+      ['-C', path.join(CODE_ROOT, repoDir), ...args],
+      { windowsHide: true, timeout: 8000 },
+      (err, stdout) => resolve(err ? '' : stdout),
+    );
+  });
+}
+
+interface EvenementGit {
+  repo: string;
+  hash: string;
+  auteur: string;
+  date: string;
+  message: string;
+  ai: boolean;
+}
+
+let timelineCache: { quand: number; valeur: unknown } | null = null;
+
+async function construireTimeline(): Promise<unknown> {
+  const SEP = '\u{1f}';
+  const evenements: EvenementGit[] = [];
+  const activite: Record<string, number[]> = {};
+  const jourIndex = (iso: string) => {
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+    return diff >= 0 && diff < 7 ? 6 - diff : -1;
+  };
+  await Promise.all(
+    REPOS.map(async (r) => {
+      const out = await gitLog(r.dir, [
+        'log',
+        '--since=7 days ago',
+        '--date=iso-strict',
+        `--pretty=%h${SEP}%an${SEP}%ad${SEP}%s`,
+      ]);
+      const buckets = new Array(7).fill(0) as number[];
+      for (const ligne of out.split('\n')) {
+        if (!ligne.trim()) continue;
+        const [hash, auteur, date, ...reste] = ligne.split(SEP);
+        const message = reste.join(SEP);
+        const bi = jourIndex(date);
+        if (bi >= 0) buckets[bi] += 1;
+        evenements.push({ repo: r.dir, hash, auteur, date, message, ai: /^\[ai\]/.test(message) });
+      }
+      activite[r.dir] = buckets;
+    }),
+  );
+  evenements.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return { evenements: evenements.slice(0, 120), activite };
+}
+
 export function registerJarvisRoutes(app: FastifyInstance): void {
+  app.get('/api/jarvis/timeline', async () => {
+    if (timelineCache && Date.now() - timelineCache.quand < 60_000) return timelineCache.valeur;
+    const valeur = await construireTimeline();
+    timelineCache = { quand: Date.now(), valeur };
+    return valeur;
+  });
+
   app.get('/api/jarvis/etat', async () => {
     const brief = lire(path.join(CODE_ROOT, 'jarvis', 'briefs', 'dernier.md'));
     const projets = REPOS.map((r) => {
